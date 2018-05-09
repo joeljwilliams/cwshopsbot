@@ -174,7 +174,7 @@ def list_shops(bot: Bot, update: Update) -> None:
 
 
 if __name__ == '__main__':
-    ud = Updater(config.TOKEN, workers=24)
+    ud = Updater(config.TOKEN, workers=12)
     dp = ud.dispatcher
     jq = ud.job_queue
 
