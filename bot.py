@@ -107,7 +107,8 @@ def inline_shop_search(bot: Bot, update: Update) -> None:
             results.append(InlineQueryResultArticle(
                 id=uuid4(),
                 title=f'{shop.name} {shop.mana}💧',
-                description=f'{offer.item} - {offer.mana}💧 {offer.price}💰',
+                description=f'{offer.item} - {offer.mana}💧 {offer.price}💰\n'
+                            f'{shop.ownerCastle}{shop.ownerName}',
                 input_message_content=InputTextMessageContent(f'/ws_{shop.link}')
                 )
             )
