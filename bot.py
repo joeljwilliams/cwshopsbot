@@ -25,6 +25,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger("cw-shops-bot")
 
 
+@run_async
 def start(bot: Bot, update: Update) -> None:
     logger.debug("Entering: start")
 
@@ -38,6 +39,7 @@ def start(bot: Bot, update: Update) -> None:
     return
 
 
+@run_async
 def help(bot: Bot, update: Update) -> None:
     logger.debug("Entering: help")
 
@@ -83,6 +85,7 @@ def dbhandler(bot: Bot, update: Update) -> None:
     return
 
 
+@run_async
 def inline_shop_search(bot: Bot, update: Update) -> None:
     logger.debug("Entering: inline_shop_search")
 
@@ -106,7 +109,7 @@ def inline_shop_search(bot: Bot, update: Update) -> None:
             shop = offer.shop
             results.append(InlineQueryResultArticle(
                 id=uuid4(),
-                title=f'{shop.name} {shop.mana}💧',
+                title=f'{shop.kind}{shop.name} {shop.mana}💧',
                 description=f'{offer.item} - {offer.mana}💧 {offer.price}💰\n'
                             f'{shop.ownerCastle}{shop.ownerName}',
                 input_message_content=InputTextMessageContent(f'/ws_{shop.link}')
@@ -119,6 +122,7 @@ def inline_shop_search(bot: Bot, update: Update) -> None:
     return
 
 
+@run_async
 def shops_updater(bot: Bot, job: Job) -> None:
     logger.debug("Entering: shops_updater")
 
@@ -149,8 +153,28 @@ def shops_updater(bot: Bot, job: Job) -> None:
         return
 
 
+@run_async
+def list_shops(bot: Bot, update: Update) -> None:
+    logger.debug("Entering: list_shops")
+
+    chat = update.effective_chat  # type: Chat
+    msg = update.effective_message  # type: Message
+    usr = update.effective_user  # type: User
+
+    response = ''
+
+    with orm.db_session:
+        shops = dbShop.select(lambda s: s).order_by(dbShop.kind)
+        for shop in shops:
+            response += f'<a href="https://t.me/share/url?url=/ws_{shop.link}">{shop.kind}{shop.name}</a> '
+            response += f'<i>{shop.mana}💧</i> by <b>{shop.ownerCastle}{shop.ownerName}</b>'
+            response += '\n\n'
+
+    msg.reply_text(response, parse_mode='HTML')
+
+
 if __name__ == '__main__':
-    ud = Updater(config.TOKEN)
+    ud = Updater(config.TOKEN, workers=24)
     dp = ud.dispatcher
     jq = ud.job_queue
 
@@ -160,6 +184,8 @@ if __name__ == '__main__':
 
     dp.add_handler(CommandHandler('start', start))
     dp.add_handler(CommandHandler('help', help))
+
+    dp.add_handler(CommandHandler(['list', 'shops'], list_shops))
 
     dp.add_handler(InlineQueryHandler(inline_shop_search))
 
