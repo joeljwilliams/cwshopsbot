@@ -105,14 +105,24 @@ def inline_shop_search(bot: Bot, update: Update) -> None:
             offers = offers.filter(lambda o: keyword.lower() in o.item.lower())
         offers = offers.limit(50)
         # TODO: If search is empty, search by shop name as well?
-        for offer in offers:
-            shop = offer.shop
+        if offers:
+            # some ptt bias in the results
+            for offer in sorted(offers, key=lambda x: x.shop.ownerCastle if x.shop.ownerCastle != '🥔' else 'A'):
+                shop = offer.shop
+                # TODO: stack offers from same shop in 1 result
+                results.append(InlineQueryResultArticle(
+                    id=uuid4(),
+                    title=f'{shop.kind}{shop.name} {shop.mana}💧',
+                    description=f'{offer.item} - {offer.mana}💧 {offer.price}💰\n'
+                                f'{shop.ownerCastle}{shop.ownerName}',
+                    input_message_content=InputTextMessageContent(f'/ws_{shop.link}')
+                    )
+                )
+        else:
             results.append(InlineQueryResultArticle(
                 id=uuid4(),
-                title=f'{shop.kind}{shop.name} {shop.mana}💧',
-                description=f'{offer.item} - {offer.mana}💧 {offer.price}💰\n'
-                            f'{shop.ownerCastle}{shop.ownerName}',
-                input_message_content=InputTextMessageContent(f'/ws_{shop.link}')
+                title='No Results',
+                input_message_content=InputTextMessageContent('No results')
                 )
             )
 
