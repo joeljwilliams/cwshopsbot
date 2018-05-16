@@ -10,7 +10,9 @@ DB_PASS = os.getenv('DATABASE_PASSWORD')
 DB_HOST = os.getenv('DATABASE_SERVICE_NAME')
 DB_NAME = os.getenv('DATABASE_NAME')
 
-SHOP_API = 'https://cw.krasovsky.me/api/shops'  # thanks https://t.me/kraso
+RESULT_SIZE = os.getenv('RESULT_SIZE', 30)
+
+SHOP_API = os.getenv('SHOPS_API_ENDPOINT', 'https://cw.krasovsky.me/api/shops')  # thanks https://t.me/kraso
 
 if APP_ENV == 'PROD_OPENSHIFT':
     LOGLEVEL = 'INFO'

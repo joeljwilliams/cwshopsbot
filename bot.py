@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from uuid import uuid4
+from math import ceil
 import requests
-import json
 
 import config
 
@@ -161,16 +161,21 @@ def list_shops(bot: Bot, update: Update) -> None:
     msg = update.effective_message  # type: Message
     usr = update.effective_user  # type: User
 
-    response = ''
+    responses = []
 
     with orm.db_session:
-        shops = dbShop.select(lambda s: s).order_by(dbShop.kind)
-        for shop in shops:
-            response += f'<a href="https://t.me/share/url?url=/ws_{shop.link}">{shop.kind}{shop.name}</a> '
-            response += f'<i>{shop.mana}💧</i> by <b>{shop.ownerCastle}{shop.ownerName}</b>'
-            response += '\n\n'
+        shops = dbShop.select(lambda s: s).order_by(dbShop.kind, dbShop.ownerCastle)
+        num = shops.count()
+        for page in range(1, ceil(num/config.RESULT_SIZE)+1):
+            response = ''
+            for shop in shops.page(page, pagesize=config.RESULT_SIZE):
+                response += f'<a href="https://t.me/share/url?url=/ws_{shop.link}">{shop.kind}{shop.name}</a> '
+                response += f'<i>{shop.mana}💧</i> by <b>{shop.ownerCastle}{shop.ownerName}</b>'
+                response += '\n\n'
+            responses.append(response)
 
-    msg.reply_text(response, parse_mode='HTML')
+    for response in responses:
+        msg.reply_text(response, parse_mode='HTML')
 
 
 if __name__ == '__main__':
@@ -195,4 +200,3 @@ if __name__ == '__main__':
     else:
         ud.start_polling(clean=True)
     ud.idle()
-
