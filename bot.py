@@ -183,7 +183,7 @@ if __name__ == '__main__':
     dp = ud.dispatcher
     jq = ud.job_queue
 
-    jq.run_repeating(shops_updater, interval=5*60, first=0)  # every 5 minutes, starting now.
+    jq.run_repeating(shops_updater, interval=config.UPDATE_INTERVAL, first=0)
 
     dp.add_handler(TypeHandler(Update, dbhandler), group=-1)
 
