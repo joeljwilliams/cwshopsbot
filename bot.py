@@ -136,7 +136,7 @@ def inline_shop_search(bot: Bot, update: Update) -> None:
 def shops_updater(bot: Bot, job: Job) -> None:
     logger.debug("Entering: shops_updater")
 
-    resp = requests.get(config.SHOP_API)
+    resp = requests.get(config.SHOP_API, verify=False)
 
     if resp.status_code == 200:
         logger.debug('Retrieved shop data. Dropping and recreating tables.')
