@@ -3,3 +3,4 @@ pony
 python-telegram-bot
 psycopg2-binary
 requests
+certifi==2018.8.24
